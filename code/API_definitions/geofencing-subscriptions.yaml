@@ -816,6 +816,7 @@ components:
 
     Area:
       type: object
+      description: The geofencing area where the monitor is active. This area is specified by API consumers in the subscription request. The same area definition is included in event notifications without any modifications.
       properties:
         areaType:
           $ref: "#/components/schemas/AreaType"
