@@ -241,6 +241,7 @@ components:
           $ref: '#/components/schemas/Device'
         maxAge:
           type: integer
+          minimum: 0
           description: Maximum age of the location information which is accepted for the location retrieval (in seconds). Absence of maxAge means "any age" and maxAge=0 means a fresh calculation.
         maxSurface:
           type: integer
