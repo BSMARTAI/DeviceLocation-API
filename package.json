@@ -1,12 +1,14 @@
 {
-  "name": "bsmart-telecom-gateway",
+  "name": "device-location-api",
   "version": "1.0.0",
+  "description": "B SMART Telecom Intelligence API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.19.2",
-    "twilio": "^4.23.0"
+    "twilio": "^4.20.0"
   }
 }
