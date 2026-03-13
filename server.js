@@ -12,7 +12,7 @@ const client = twilio(
   process.env.TWILIO_AUTH
 );
 
-/* ROOT */
+/* ROOT ROUTE */
 app.get("/", (req, res) => {
   res.json({
     service: "B SMART DeviceLocation API",
@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
   });
 });
 
-/* LOCATION */
+/* LOCATION ENDPOINT */
 app.get("/location-retrieval", (req, res) => {
   res.json({
     latitude: 38.627,
@@ -41,6 +41,13 @@ app.get("/location-retrieval", (req, res) => {
 app.post("/carrier-lookup", async (req, res) => {
 
   const phone = req.body.phoneNumber;
+
+  /* VALIDATION */
+  if (!phone) {
+    return res.status(400).json({
+      error: "phoneNumber is required"
+    });
+  }
 
   try {
 
@@ -67,7 +74,7 @@ app.post("/carrier-lookup", async (req, res) => {
 /* TEST ROUTE */
 app.get("/carrier-test", async (req, res) => {
 
-  const phone = "+13145551234";
+  const phone = "+18082894652";
 
   try {
 
@@ -91,8 +98,9 @@ app.get("/carrier-test", async (req, res) => {
 
 });
 
+/* SERVER */
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`Telecom API Gateway running on port ${PORT}`);
+  console.log(`B SMART Telecom API running on port ${PORT}`);
 });
