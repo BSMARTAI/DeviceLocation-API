@@ -52,8 +52,10 @@ app.post("/carrier-lookup", async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log("Telecom API Gateway running on port 3000");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+ console.log(`Telecom API Gateway running on port ${PORT}`);
 });
 app.get("/carrier-test", async (req, res) => {
 
