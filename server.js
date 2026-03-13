@@ -1,8 +1,10 @@
 const express = require("express");
 const twilio = require("twilio");
+const cors = require("cors");
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 const client = twilio(
@@ -10,7 +12,7 @@ const client = twilio(
   process.env.TWILIO_AUTH
 );
 
-/* ROOT ROUTE */
+/* ROOT */
 app.get("/", (req, res) => {
   res.json({
     service: "B SMART DeviceLocation API",
@@ -24,12 +26,14 @@ app.get("/", (req, res) => {
   });
 });
 
-/* LOCATION ENDPOINT */
+/* LOCATION */
 app.get("/location-retrieval", (req, res) => {
   res.json({
     latitude: 38.627,
     longitude: -90.1994,
-    city: "St Louis"
+    city: "St Louis",
+    state: "Missouri",
+    country: "USA"
   });
 });
 
@@ -38,12 +42,6 @@ app.post("/carrier-lookup", async (req, res) => {
 
   const phone = req.body.phoneNumber;
 
-  if (!phone) {
-    return res.status(400).json({
-      error: "phoneNumber is required"
-    });
-  }
-
   try {
 
     const data = await client.lookups.v2.phoneNumbers(phone)
@@ -66,10 +64,10 @@ app.post("/carrier-lookup", async (req, res) => {
 
 });
 
-/* BROWSER TEST */
+/* TEST ROUTE */
 app.get("/carrier-test", async (req, res) => {
 
-  const phone = "+18082894652";
+  const phone = "+13145551234";
 
   try {
 
@@ -93,7 +91,6 @@ app.get("/carrier-test", async (req, res) => {
 
 });
 
-/* SERVER START */
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
