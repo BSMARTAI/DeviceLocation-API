@@ -69,7 +69,7 @@ app.post("/carrier-lookup", async (req, res) => {
 /* BROWSER TEST */
 app.get("/carrier-test", async (req, res) => {
 
-  const phone = "+13145551234";
+  const phone = "+18082894652";
 
   try {
 
