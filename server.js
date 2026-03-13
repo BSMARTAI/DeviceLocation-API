@@ -55,3 +55,26 @@ app.post("/carrier-lookup", async (req, res) => {
 app.listen(3000, () => {
   console.log("Telecom API Gateway running on port 3000");
 });
+app.get("/carrier-test", async (req, res) => {
+
+  const phone = "+13145551234";
+
+  try {
+
+    const data = await client.lookups.v2.phoneNumbers(phone)
+      .fetch({ type: ["carrier"] });
+
+    res.json({
+      phone: phone,
+      carrier: data.carrier.name,
+      type: data.carrier.type,
+      country: data.countryCode
+    });
+
+  } catch (err) {
+
+    res.status(500).json({ error: err.message });
+
+  }
+
+});
