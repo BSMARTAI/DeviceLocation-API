@@ -9,23 +9,13 @@ const client = twilio(
   process.env.TWILIO_SID,
   process.env.TWILIO_AUTH
 );
-app.get("/", (req, res) => {
-  res.json({
-    service: "B SMART DeviceLocation API",
-    status: "running",
-    company: "B SMART AI",
-    endpoints: [
-      "/location-retrieval",
-      "/carrier-lookup",
-      "/carrier-test"
-    ]
-  });
-});
+
 /* ROOT ROUTE */
 app.get("/", (req, res) => {
   res.json({
     service: "B SMART DeviceLocation API",
     status: "running",
+    company: "B SMART AI",
     endpoints: [
       "/location-retrieval",
       "/carrier-lookup",
@@ -48,6 +38,12 @@ app.post("/carrier-lookup", async (req, res) => {
 
   const phone = req.body.phoneNumber;
 
+  if (!phone) {
+    return res.status(400).json({
+      error: "phoneNumber is required"
+    });
+  }
+
   try {
 
     const data = await client.lookups.v2.phoneNumbers(phone)
@@ -55,14 +51,16 @@ app.post("/carrier-lookup", async (req, res) => {
 
     res.json({
       phone: phone,
-      carrier: data.carrier.name,
-      type: data.carrier.type,
+      carrier: data.carrier?.name || "Unknown",
+      type: data.carrier?.type || "Unknown",
       country: data.countryCode
     });
 
   } catch (err) {
 
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message
+    });
 
   }
 
@@ -80,20 +78,22 @@ app.get("/carrier-test", async (req, res) => {
 
     res.json({
       phone: phone,
-      carrier: data.carrier.name,
-      type: data.carrier.type,
+      carrier: data.carrier?.name || "Unknown",
+      type: data.carrier?.type || "Unknown",
       country: data.countryCode
     });
 
   } catch (err) {
 
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message
+    });
 
   }
 
 });
 
-/* SERVER */
+/* SERVER START */
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
