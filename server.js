@@ -9,7 +9,18 @@ const client = twilio(
   process.env.TWILIO_SID,
   process.env.TWILIO_AUTH
 );
-
+app.get("/", (req, res) => {
+  res.json({
+    service: "B SMART DeviceLocation API",
+    status: "running",
+    company: "B SMART AI",
+    endpoints: [
+      "/location-retrieval",
+      "/carrier-lookup",
+      "/carrier-test"
+    ]
+  });
+});
 /* ROOT ROUTE */
 app.get("/", (req, res) => {
   res.json({
