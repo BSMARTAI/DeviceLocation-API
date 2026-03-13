@@ -5,24 +5,16 @@ const app = express();
 
 app.use(express.json());
 
-/*
-Twilio client
-Uses environment variables from Render
-*/
 const client = twilio(
   process.env.TWILIO_SID,
   process.env.TWILIO_AUTH
 );
 
-/*
-ROOT ENDPOINT
-This stops the "Cannot GET /" message
-*/
+/* ROOT ROUTE */
 app.get("/", (req, res) => {
   res.json({
     service: "B SMART DeviceLocation API",
     status: "running",
-    company: "B SMART AI",
     endpoints: [
       "/location-retrieval",
       "/carrier-lookup",
@@ -31,33 +23,19 @@ app.get("/", (req, res) => {
   });
 });
 
-/*
-LOCATION TEST ENDPOINT
-Simple test data for now
-*/
+/* LOCATION ENDPOINT */
 app.get("/location-retrieval", (req, res) => {
   res.json({
     latitude: 38.627,
     longitude: -90.1994,
-    city: "St Louis",
-    state: "Missouri",
-    country: "USA"
+    city: "St Louis"
   });
 });
 
-/*
-POST CARRIER LOOKUP
-Used by apps / APIs
-*/
+/* CARRIER LOOKUP */
 app.post("/carrier-lookup", async (req, res) => {
 
   const phone = req.body.phoneNumber;
-
-  if (!phone) {
-    return res.status(400).json({
-      error: "phoneNumber is required"
-    });
-  }
 
   try {
 
@@ -66,25 +44,20 @@ app.post("/carrier-lookup", async (req, res) => {
 
     res.json({
       phone: phone,
-      carrier: data.carrier?.name || "Unknown",
-      type: data.carrier?.type || "Unknown",
+      carrier: data.carrier.name,
+      type: data.carrier.type,
       country: data.countryCode
     });
 
   } catch (err) {
 
-    res.status(500).json({
-      error: err.message
-    });
+    res.status(500).json({ error: err.message });
 
   }
 
 });
 
-/*
-GET TEST VERSION
-Lets you test in a browser
-*/
+/* BROWSER TEST */
 app.get("/carrier-test", async (req, res) => {
 
   const phone = "+13145551234";
@@ -96,25 +69,20 @@ app.get("/carrier-test", async (req, res) => {
 
     res.json({
       phone: phone,
-      carrier: data.carrier?.name || "Unknown",
-      type: data.carrier?.type || "Unknown",
+      carrier: data.carrier.name,
+      type: data.carrier.type,
       country: data.countryCode
     });
 
   } catch (err) {
 
-    res.status(500).json({
-      error: err.message
-    });
+    res.status(500).json({ error: err.message });
 
   }
 
 });
 
-/*
-SERVER START
-Uses Render dynamic port
-*/
+/* SERVER */
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
