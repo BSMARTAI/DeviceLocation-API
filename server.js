@@ -11,10 +11,13 @@ const client = twilio(
 
 const PORT = process.env.PORT || 3000;
 
-/* ROOT STATUS */
+/* =====================================
+   ROOT STATUS
+===================================== */
+
 app.get("/", (req, res) => {
   res.json({
-    service: "B SMART Telecom Intelligence API",
+    service: "B SMART Communications + CaptionSign API",
     status: "running",
     company: "B SMART AI",
     endpoints: [
@@ -24,12 +27,17 @@ app.get("/", (req, res) => {
       "/call-user",
       "/send-otp",
       "/verify-otp",
-      "/location-retrieval"
+      "/location-retrieval",
+      "/captionsign",
+      "/live-caption"
     ]
   });
 });
 
-/* LOCATION DEMO */
+/* =====================================
+   LOCATION DEMO
+===================================== */
+
 app.get("/location-retrieval", (req, res) => {
   res.json({
     latitude: 38.627,
@@ -38,7 +46,10 @@ app.get("/location-retrieval", (req, res) => {
   });
 });
 
-/* CARRIER LOOKUP */
+/* =====================================
+   CARRIER LOOKUP
+===================================== */
+
 app.post("/carrier-lookup", async (req, res) => {
 
   const phone = req.body.phoneNumber;
@@ -64,9 +75,13 @@ app.post("/carrier-lookup", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+
 });
 
-/* PHONE VERIFICATION */
+/* =====================================
+   PHONE VERIFICATION
+===================================== */
+
 app.post("/verify-phone", async (req, res) => {
 
   const phone = req.body.phoneNumber;
@@ -79,8 +94,7 @@ app.post("/verify-phone", async (req, res) => {
 
   try {
 
-    const data = await client.lookups.v2.phoneNumbers(phone)
-      .fetch();
+    const data = await client.lookups.v2.phoneNumbers(phone).fetch();
 
     res.json({
       phone: phone,
@@ -96,9 +110,13 @@ app.post("/verify-phone", async (req, res) => {
     });
 
   }
+
 });
 
-/* SEND SMS */
+/* =====================================
+   SEND SMS
+===================================== */
+
 app.post("/send-sms", async (req, res) => {
 
   const { phoneNumber, message } = req.body;
@@ -129,9 +147,13 @@ app.post("/send-sms", async (req, res) => {
     });
 
   }
+
 });
 
-/* VOICE CALL */
+/* =====================================
+   VOICE CALL
+===================================== */
+
 app.post("/call-user", async (req, res) => {
 
   const { phoneNumber } = req.body;
@@ -162,10 +184,16 @@ app.post("/call-user", async (req, res) => {
     });
 
   }
+
 });
 
-/* OTP SEND */
+/* =====================================
+   OTP SYSTEM
+===================================== */
+
 const otpStore = {};
+
+/* SEND OTP */
 
 app.post("/send-otp", (req, res) => {
 
@@ -189,7 +217,8 @@ app.post("/send-otp", (req, res) => {
 
 });
 
-/* OTP VERIFY */
+/* VERIFY OTP */
+
 app.post("/verify-otp", (req, res) => {
 
   const { phoneNumber, otp } = req.body;
@@ -218,7 +247,81 @@ app.post("/verify-otp", (req, res) => {
 
 });
 
-/* START SERVER */
+/* =====================================
+   CAPTIONSIGN API
+   (Streaming accessibility infrastructure)
+===================================== */
+
+app.post("/captionsign", async (req, res) => {
+
+  const { audio_url } = req.body;
+
+  if (!audio_url) {
+    return res.status(400).json({
+      error: "audio_url required"
+    });
+  }
+
+  try {
+
+    /* placeholder AI processing */
+
+    const result = {
+      text: "Hello how can I help you",
+      captions: true,
+      asl_output: "asl_avatar_data",
+      timestamp: Date.now()
+    };
+
+    res.json(result);
+
+  } catch (err) {
+
+    res.status(500).json({
+      error: err.message
+    });
+
+  }
+
+});
+
+/* =====================================
+   LIVE STREAM CAPTION PROCESSING
+===================================== */
+
+app.post("/live-caption", async (req, res) => {
+
+  const { stream } = req.body;
+
+  if (!stream) {
+    return res.status(400).json({
+      error: "stream required"
+    });
+  }
+
+  try {
+
+    const caption = {
+      text: "Live caption processing",
+      timestamp: Date.now()
+    };
+
+    res.json(caption);
+
+  } catch (err) {
+
+    res.status(500).json({
+      error: err.message
+    });
+
+  }
+
+});
+
+/* =====================================
+   SERVER START
+===================================== */
+
 app.listen(PORT, () => {
-  console.log(`B SMART Telecom API running on port ${PORT}`);
+  console.log(`B SMART API running on port ${PORT}`);
 });
