@@ -1,10 +1,7 @@
 const express = require("express");
 const twilio = require("twilio");
-const cors = require("cors");
 
 const app = express();
-
-app.use(cors());
 app.use(express.json());
 
 const client = twilio(
@@ -12,28 +9,32 @@ const client = twilio(
   process.env.TWILIO_AUTH
 );
 
-/* ROOT ROUTE */
+const PORT = process.env.PORT || 3000;
+
+/* ROOT STATUS */
 app.get("/", (req, res) => {
   res.json({
-    service: "B SMART DeviceLocation API",
+    service: "B SMART Telecom Intelligence API",
     status: "running",
     company: "B SMART AI",
     endpoints: [
-      "/location-retrieval",
       "/carrier-lookup",
-      "/carrier-test"
+      "/verify-phone",
+      "/send-sms",
+      "/call-user",
+      "/send-otp",
+      "/verify-otp",
+      "/location-retrieval"
     ]
   });
 });
 
-/* LOCATION ENDPOINT */
+/* LOCATION DEMO */
 app.get("/location-retrieval", (req, res) => {
   res.json({
     latitude: 38.627,
     longitude: -90.1994,
-    city: "St Louis",
-    state: "Missouri",
-    country: "USA"
+    city: "St Louis"
   });
 });
 
@@ -42,7 +43,6 @@ app.post("/carrier-lookup", async (req, res) => {
 
   const phone = req.body.phoneNumber;
 
-  /* VALIDATION */
   if (!phone) {
     return res.status(400).json({
       error: "phoneNumber is required"
@@ -56,36 +56,70 @@ app.post("/carrier-lookup", async (req, res) => {
 
     res.json({
       phone: phone,
-      carrier: data.carrier?.name || "Unknown",
-      type: data.carrier?.type || "Unknown",
+      carrier: data.carrier.name,
+      type: data.carrier.type,
       country: data.countryCode
     });
 
   } catch (err) {
-
-    res.status(500).json({
-      error: err.message
-    });
-
+    res.status(500).json({ error: err.message });
   }
-
 });
 
-/* TEST ROUTE */
-app.get("/carrier-test", async (req, res) => {
+/* PHONE VERIFICATION */
+app.post("/verify-phone", async (req, res) => {
 
-  const phone = "+18082894652";
+  const phone = req.body.phoneNumber;
+
+  if (!phone) {
+    return res.status(400).json({
+      error: "phoneNumber required"
+    });
+  }
 
   try {
 
     const data = await client.lookups.v2.phoneNumbers(phone)
-      .fetch({ type: ["carrier"] });
+      .fetch();
 
     res.json({
       phone: phone,
-      carrier: data.carrier?.name || "Unknown",
-      type: data.carrier?.type || "Unknown",
+      valid: true,
       country: data.countryCode
+    });
+
+  } catch (err) {
+
+    res.json({
+      phone: phone,
+      valid: false
+    });
+
+  }
+});
+
+/* SEND SMS */
+app.post("/send-sms", async (req, res) => {
+
+  const { phoneNumber, message } = req.body;
+
+  if (!phoneNumber || !message) {
+    return res.status(400).json({
+      error: "phoneNumber and message required"
+    });
+  }
+
+  try {
+
+    const msg = await client.messages.create({
+      body: message,
+      from: process.env.TWILIO_PHONE,
+      to: phoneNumber
+    });
+
+    res.json({
+      status: "sent",
+      sid: msg.sid
     });
 
   } catch (err) {
@@ -95,12 +129,96 @@ app.get("/carrier-test", async (req, res) => {
     });
 
   }
+});
+
+/* VOICE CALL */
+app.post("/call-user", async (req, res) => {
+
+  const { phoneNumber } = req.body;
+
+  if (!phoneNumber) {
+    return res.status(400).json({
+      error: "phoneNumber required"
+    });
+  }
+
+  try {
+
+    const call = await client.calls.create({
+      url: "http://demo.twilio.com/docs/voice.xml",
+      to: phoneNumber,
+      from: process.env.TWILIO_PHONE
+    });
+
+    res.json({
+      status: "calling",
+      sid: call.sid
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      error: err.message
+    });
+
+  }
+});
+
+/* OTP SEND */
+const otpStore = {};
+
+app.post("/send-otp", (req, res) => {
+
+  const { phoneNumber } = req.body;
+
+  if (!phoneNumber) {
+    return res.status(400).json({
+      error: "phoneNumber required"
+    });
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000);
+
+  otpStore[phoneNumber] = otp;
+
+  res.json({
+    phone: phoneNumber,
+    otp: otp,
+    message: "OTP generated (demo)"
+  });
 
 });
 
-/* SERVER */
-const PORT = process.env.PORT || 3000;
+/* OTP VERIFY */
+app.post("/verify-otp", (req, res) => {
 
+  const { phoneNumber, otp } = req.body;
+
+  if (!phoneNumber || !otp) {
+    return res.status(400).json({
+      error: "phoneNumber and otp required"
+    });
+  }
+
+  if (otpStore[phoneNumber] == otp) {
+
+    delete otpStore[phoneNumber];
+
+    res.json({
+      verified: true
+    });
+
+  } else {
+
+    res.json({
+      verified: false
+    });
+
+  }
+
+});
+
+/* START SERVER */
 app.listen(PORT, () => {
   console.log(`B SMART Telecom API running on port ${PORT}`);
 });
